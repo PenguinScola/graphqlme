@@ -49,7 +49,9 @@ const typeDefs = `
         signup(username : String!, password: String!) : User
         login(username : String!, password: String!) : String
         createPost(data : PostData!) : Post
+        deletePost(postid : ID!) : String
         createComment(data : CommentData!) : Comment
+        deleteComment(commentid : ID!) : String
     }
 `
 const resolvers = {
@@ -130,6 +132,21 @@ const resolvers = {
             const post = await Post.create(input)
             return post
         },
+        deletePost : async (obj, {postid}) => {
+            const result = await Post.deleteOne({_id : postid})
+
+            if(result.ok != 1) {
+                const e = new Error("delete failed, please try again.")
+                throw e
+            }
+
+            if(result.n == 0) {
+                const e = new Error("this post does not exist.")
+                throw e
+            }
+            
+            return `postid : ${postid} deleted`
+        },
         createComment : async (obj, {data}, context) => {
             if(!context.user) {
                 const e = new Error('Please login to comment this')
@@ -143,6 +160,21 @@ const resolvers = {
 
             const comment = await Comment.create(input)
             return comment
+        },
+        deleteComment : async (obj, {commentid}) => {
+            const result = await Comment.deleteOne({_id : commentid})
+
+            if(result.ok != 1) {
+                const e = new Error("delete failed, please try again.")
+                throw e
+            }
+
+            if(result.n == 0) {
+                const e = new Error("this comment does not exist.")
+                throw e
+            }
+
+            return `commentid : ${commentid} deleted`
         }
 
     }
